@@ -8,21 +8,57 @@ import { Container, Row, Col, Button, Alert, Spinner, Badge } from 'react-bootst
 import Layout from '../../components/Layout';
 import Head from 'next/head';
 
-export default function ProductDetailPage() {
+
+export async function getServerSideProps(context) {
+    const { id } = context.params;
+
+    try {
+        const response = await fetch(`https://fake-store-api.mock.beeceptor.com/api/products/${id}`);
+
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+
+        const product = await response.json();
+
+        return {
+            props: {
+                product,
+            },
+        };
+    } catch (error) {
+        return {
+            props: {
+                product: null,
+                error: error.message
+            },
+        };
+    }
+}
+
+export default function ProductDetailPage({ product, error }) {
     const router = useRouter();
-    const { id } = router.query;
     const dispatch = useDispatch();
-    const { items, status, error } = useSelector(state => state.products);
 
-    const product = items.find(p => p.id === Number(id));
-
+    // Fallback client side fetch if ssr fails
     useEffect(() => {
-        if (id && items.length === 0 && status === 'idle') {
+        if (error && router.query.id) {
+            // If ssr failed, trying to get from Redux store
             dispatch(fetchProducts());
         }
-    }, [dispatch, items.length, status, id]);
+    }, [error, router.query.id, dispatch]);
 
-    if (status === 'loading' || !router.isReady) {
+    const handleAddToCart = () => {
+        if (product) {
+            dispatch(addToCart(product));
+            toast.success('Added to cart!', {
+                position: "top-right",
+                autoClose: 2000
+            });
+        }
+    };
+
+    if (router.isFallback) {
         return (
             <Layout pageTitle="Loading...">
                 <Container className="text-center py-5">
@@ -34,24 +70,7 @@ export default function ProductDetailPage() {
         );
     }
 
-    if (status === 'failed') {
-        return (
-            <Layout pageTitle="Error">
-                <Container className="my-4">
-                    <Alert variant="danger">
-                        Error loading products: {error}
-                        <div className="mt-3">
-                            <Button variant="primary" onClick={() => router.push('/products')}>
-                                Return to Products
-                            </Button>
-                        </div>
-                    </Alert>
-                </Container>
-            </Layout>
-        );
-    }
-
-    if (!product) {
+    if (error || !product) {
         return (
             <Layout pageTitle="Product Not Found">
                 <Container className="my-4">
@@ -66,14 +85,6 @@ export default function ProductDetailPage() {
             </Layout>
         );
     }
-
-    const handleAddToCart = () => {
-        dispatch(addToCart(product));
-        toast.success('Added to cart!', {
-            position: "top-right",
-            autoClose: 2000
-        });
-    };
 
     return (
         <Layout pageTitle={product.name}>
@@ -114,10 +125,10 @@ export default function ProductDetailPage() {
                             </div>
                         )}
 
-                        <p className="h2 text-primary mb-3">${product.price.toFixed(2)}</p>
+                        <p className="h2 text-primary mb-3">${product.price?.toFixed(2) || '0.00'}</p>
 
                         <p className={`mb-4 ${product.availability ? 'text-success' : 'text-danger'}`}>
-                            <strong>{product.availability ? ' In Stock' : '❌ Out of Stock'}</strong>
+                            <strong>{product.availability ? ' In Stock' : ' Out of Stock'}</strong>
                         </p>
 
                         <div className="mb-4">

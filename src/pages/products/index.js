@@ -1,19 +1,29 @@
 import { useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { fetchProducts } from '../../redux/slices/productSlice';
+import { useRouter } from 'next/router';
+import { fetchProducts, setSearchQuery } from '../../redux/slices/productSlice';
 import ProductCard from '../../components/ProductCard';
 import { Container, Row, Col, Alert, Spinner } from 'react-bootstrap';
 import Layout from '../../components/Layout';
 
 export default function ProductsPage() {
     const dispatch = useDispatch();
+    const router = useRouter();
+    const { search } = router.query;
     const { items, status, error } = useSelector(state => state.products);
 
     useEffect(() => {
-        if (status === 'idle') {
-            dispatch(fetchProducts());
+        // Set search query from URL if present
+        if (search) {
+            dispatch(setSearchQuery(search));
         }
-    }, [status, dispatch]);
+    }, [search, dispatch]);
+
+    useEffect(() => {
+        if (status === 'idle' || search) {
+            dispatch(fetchProducts(search || ''));
+        }
+    }, [status, dispatch, search]);
 
     if (status === 'loading') {
         return (
@@ -22,6 +32,7 @@ export default function ProductsPage() {
                     <Spinner animation="border" role="status">
                         <span className="visually-hidden">Loading...</span>
                     </Spinner>
+                    <p className="mt-2">Loading products...</p>
                 </Container>
             </Layout>
         );
@@ -32,7 +43,14 @@ export default function ProductsPage() {
             <Layout pageTitle="Products">
                 <Container className="py-4">
                     <Alert variant="danger">
-                        Error loading products: {error}
+                        <Alert.Heading>Error loading products</Alert.Heading>
+                        <p>{error}</p>
+                        <button
+                            className="btn btn-primary"
+                            onClick={() => dispatch(fetchProducts(search || ''))}
+                        >
+                            Try Again
+                        </button>
                     </Alert>
                 </Container>
             </Layout>
@@ -40,19 +58,62 @@ export default function ProductsPage() {
     }
 
     return (
-        <Layout pageTitle="Products">
+        <Layout pageTitle={search ? `Search: ${search}` : "All Products"}>
             <Container className="my-4">
-                <h1 className="mb-4">Our Products</h1>
+                <div className="d-flex justify-content-between align-items-center mb-4">
+                    <h1 className="mb-0">
+                        {search ? `Search Results for "${search}"` : 'Our Products'}
+                    </h1>
+                    {search && (
+                        <button
+                            className="btn btn-outline-secondary"
+                            onClick={() => {
+                                router.push('/products');
+                                dispatch(setSearchQuery(''));
+                            }}
+                        >
+                            Clear Search
+                        </button>
+                    )}
+                </div>
+
                 {items.length === 0 ? (
-                    <Alert variant="info">No products available.</Alert>
+                    <Alert variant="info" className="text-center">
+                        <Alert.Heading>
+                            {search ? 'No products found' : 'No products available'}
+                        </Alert.Heading>
+                        <p>
+                            {search
+                                ? `No products match your search for "${search}"`
+                                : 'Please check back later for new products.'
+                            }
+                        </p>
+                        {search && (
+                            <button
+                                className="btn btn-primary"
+                                onClick={() => {
+                                    router.push('/products');
+                                    dispatch(setSearchQuery(''));
+                                }}
+                            >
+                                View All Products
+                            </button>
+                        )}
+                    </Alert>
                 ) : (
-                    <Row className="g-4">
-                        {items.map(product => (
-                            <Col key={product.id} sm={6} md={4} lg={3}>
-                                <ProductCard product={product} />
-                            </Col>
-                        ))}
-                    </Row>
+                    <>
+                        <p className="text-muted mb-4">
+                            Showing {items.length} product{items.length !== 1 ? 's' : ''}
+                            {search && ` for "${search}"`}
+                        </p>
+                        <Row className="g-4">
+                            {items.map(product => (
+                                <Col key={product.id} sm={6} md={4} lg={3}>
+                                    <ProductCard product={product} />
+                                </Col>
+                            ))}
+                        </Row>
+                    </>
                 )}
             </Container>
         </Layout>
