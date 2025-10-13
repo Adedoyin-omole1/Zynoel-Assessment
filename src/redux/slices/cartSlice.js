@@ -25,26 +25,28 @@ const saveCartToLocalStorage = (cart) => {
 
 const cartSlice = createSlice({
     name: 'cart',
-    initialState: {
-        items: loadCartFromLocalStorage(),
-        error: null,
-    },
+    initialState: { items: loadCartFromLocalStorage(), error: null },
     reducers: {
         addToCart: (state, action) => {
-            if (!action.payload?.id) {
+            const payload = action.payload || {};
+            const normalizedId = payload.id ?? payload.product_id;
+            if (!normalizedId) {
                 state.error = 'Invalid product data';
                 return;
             }
 
-            const existingItem = state.items.find(item => item.id === action.payload.id);
-            if (existingItem) {
-                existingItem.quantity += 1;
-            } else {
-                state.items.push({
-                    ...action.payload,
-                    quantity: 1
-                });
+            if (payload.availability === false || payload.availability === 'out of stock') {
+                state.error = 'Product is out of stock';
+                return;
             }
+
+            const existing = state.items.find(i => i.id === normalizedId);
+            if (existing) {
+                existing.quantity += 1;
+            } else {
+                state.items.push({ ...payload, id: normalizedId, quantity: 1 });
+            }
+
             state.error = null;
             saveCartToLocalStorage(state.items);
         },
@@ -53,8 +55,7 @@ const cartSlice = createSlice({
                 state.error = 'Invalid product ID';
                 return;
             }
-
-            state.items = state.items.filter(item => item.id !== action.payload);
+            state.items = state.items.filter(i => i.id !== action.payload);
             state.error = null;
             saveCartToLocalStorage(state.items);
         },
@@ -63,35 +64,18 @@ const cartSlice = createSlice({
                 state.error = 'Invalid quantity update data';
                 return;
             }
-
-            const item = state.items.find(item => item.id === action.payload.id);
+            const item = state.items.find(i => i.id === action.payload.id);
             if (item) {
                 item.quantity = Math.max(0, action.payload.quantity);
-                if (item.quantity === 0) {
-                    state.items = state.items.filter(i => i.id !== action.payload.id);
-                }
+                if (item.quantity === 0) state.items = state.items.filter(i => i.id !== action.payload.id);
             }
             state.error = null;
             saveCartToLocalStorage(state.items);
         },
-        clearCart: (state) => {
-            state.items = [];
-            state.error = null;
-            saveCartToLocalStorage(state.items);
-        },
-        loadCart: (state) => {
-            state.items = loadCartFromLocalStorage();
-            state.error = null;
-        }
-    },
+        clearCart: state => { state.items = []; state.error = null; saveCartToLocalStorage(state.items); },
+        loadCart: state => { state.items = loadCartFromLocalStorage(); state.error = null; }
+    }
 });
 
-export const {
-    addToCart,
-    removeFromCart,
-    updateQuantity,
-    clearCart,
-    loadCart
-} = cartSlice.actions;
-
+export const { addToCart, removeFromCart, updateQuantity, clearCart, loadCart } = cartSlice.actions;
 export default cartSlice.reducer;

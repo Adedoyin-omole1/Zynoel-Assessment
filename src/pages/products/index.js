@@ -21,9 +21,18 @@ export default function ProductsPage() {
 
     useEffect(() => {
         if (status === 'idle' || search) {
-            dispatch(fetchProducts(search || ''));
+            dispatch(fetchProducts());
         }
     }, [status, dispatch, search]);
+
+    // Filter products based on search query
+    const filteredProducts = search
+        ? items.filter(product =>
+            product.name?.toLowerCase().includes(search.toLowerCase()) ||
+            product.description?.toLowerCase().includes(search.toLowerCase()) ||
+            product.category?.toLowerCase().includes(search.toLowerCase())
+        )
+        : items;
 
     if (status === 'loading') {
         return (
@@ -47,7 +56,7 @@ export default function ProductsPage() {
                         <p>{error}</p>
                         <button
                             className="btn btn-primary"
-                            onClick={() => dispatch(fetchProducts(search || ''))}
+                            onClick={() => dispatch(fetchProducts())}
                         >
                             Try Again
                         </button>
@@ -77,7 +86,7 @@ export default function ProductsPage() {
                     )}
                 </div>
 
-                {items.length === 0 ? (
+                {filteredProducts.length === 0 ? (
                     <Alert variant="info" className="text-center">
                         <Alert.Heading>
                             {search ? 'No products found' : 'No products available'}
@@ -103,11 +112,11 @@ export default function ProductsPage() {
                 ) : (
                     <>
                         <p className="text-muted mb-4">
-                            Showing {items.length} product{items.length !== 1 ? 's' : ''}
+                            Showing {filteredProducts.length} product{filteredProducts.length !== 1 ? 's' : ''}
                             {search && ` for "${search}"`}
                         </p>
                         <Row className="g-4">
-                            {items.map(product => (
+                            {filteredProducts.map(product => (
                                 <Col key={product.id} sm={6} md={4} lg={3}>
                                     <ProductCard product={product} />
                                 </Col>

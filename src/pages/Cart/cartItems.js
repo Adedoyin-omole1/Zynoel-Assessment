@@ -8,7 +8,7 @@ export default function CartItem({ item }) {
     const dispatch = useDispatch();
 
     if (!item) {
-        return null; // Prevent rendering if item is undefined
+        return null;
     }
 
     const handleQuantityChange = (newQuantity) => {
@@ -27,35 +27,35 @@ export default function CartItem({ item }) {
                 <div className="d-flex align-items-center">
                     <div style={{ position: 'relative', width: '60px', height: '60px' }}>
                         <Image
-                            src={item?.image || "/placeholder.png"}
-                            alt={item?.name || "Product image"}
+                            src={item.image}
+                            alt={item.name}
                             fill
                             style={{ objectFit: 'cover' }}
                             className="rounded"
                         />
                     </div>
-                    <span className="ms-3">{item?.name || "Unknown product"}</span>
+                    <span className="ms-3">{item.name}</span>
                 </div>
             </td>
-            <td className="align-middle">${item?.price?.toFixed(2) || "0.00"}</td>
+            <td className="align-middle">${item.price?.toFixed(2)}</td>
             <td className="align-middle">
                 <div className="d-flex align-items-center">
                     <Button
                         size="sm"
                         variant="outline-secondary"
-                        onClick={() => handleQuantityChange((item?.quantity || 1) - 1)}
-                        disabled={(item?.quantity || 1) <= 1}
+                        onClick={() => handleQuantityChange(item.quantity - 1)}
+                        disabled={item.quantity <= 1}
                     >-</Button>
-                    <span className="mx-3">{item?.quantity || 1}</span>
+                    <span className="mx-3">{item.quantity}</span>
                     <Button
                         size="sm"
                         variant="outline-secondary"
-                        onClick={() => handleQuantityChange((item?.quantity || 1) + 1)}
+                        onClick={() => handleQuantityChange(item.quantity + 1)}
                     >+</Button>
                 </div>
             </td>
             <td className="align-middle">
-                ${(item?.price && item?.quantity) ? (item.price * item.quantity).toFixed(2) : "0.00"}
+                ${(item.price * item.quantity).toFixed(2)}
             </td>
             <td className="align-middle">
                 <Button

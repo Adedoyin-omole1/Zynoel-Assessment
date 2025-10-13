@@ -8,9 +8,9 @@ export default function Navbar() {
     const [searchQuery, setSearchQuery] = useState('');
     const router = useRouter();
 
-    // logic for cart item count.
-    const cartItems = useSelector(state => state.cart.items);
-    const cartItemCount = cartItems.reduce((total, item) => total + item.quantity, 0);
+    // logics for cart item count.
+    const cartItems = useSelector(state => state.cart.items || []);
+    const cartItemCount = cartItems.reduce((total, item) => total + (item.quantity || 0), 0);
 
     const handleSearch = (e) => {
         e.preventDefault();
@@ -22,8 +22,8 @@ export default function Navbar() {
     return (
         <nav className="navbar navbar-expand-lg bg-primary navbar-dark sticky-top">
             <div className="container">
-                <Link href="/" className="navbar-brand fw-bold">
-                    Adedoyin-Ecommerce
+                <Link href="/" legacyBehavior>
+                    <a className="navbar-brand fw-bold">Adedoyin-Ecommerce</a>
                 </Link>
 
                 <button
@@ -41,23 +41,17 @@ export default function Navbar() {
                 <div className="collapse navbar-collapse" id="navbarSupportedContent">
                     <ul className="navbar-nav mx-auto mb-2 mb-lg-0">
                         <li className="nav-item">
-                            <Link
-                                href="/"
-                                className={`nav-link ${router.pathname === '/' ? 'active' : ''}`}
-                            >
-                                Home
+                            <Link href="/" legacyBehavior>
+                                <a className={`nav-link ${router.pathname === '/' ? 'active' : ''}`}>Home</a>
                             </Link>
                         </li>
                         <li className="nav-item">
-                            <Link
-                                href="/products"
-                                className={`nav-link ${router.pathname.startsWith('/products') ? 'active' : ''}`}
-                            >
-                                Products
+                            <Link href="/products" legacyBehavior>
+                                <a className={`nav-link ${router.pathname.startsWith('/products') ? 'active' : ''}`}>Products</a>
                             </Link>
                         </li>
                         <li className="nav-item dropdown">
-                            <Link
+                            <a
                                 href="#"
                                 className="nav-link dropdown-toggle"
                                 role="button"
@@ -65,22 +59,22 @@ export default function Navbar() {
                                 aria-expanded="false"
                             >
                                 Categories
-                            </Link>
+                            </a>
                             <ul className="dropdown-menu">
                                 <li>
-                                    <Link href="/categories/electronics" className="dropdown-item">
-                                        Electronics
+                                    <Link href="/categories/electronics" legacyBehavior>
+                                        <a className="dropdown-item">Electronics</a>
                                     </Link>
                                 </li>
                                 <li>
-                                    <Link href="/categories/clothing" className="dropdown-item">
-                                        Clothing
+                                    <Link href="/categories/clothing" legacyBehavior>
+                                        <a className="dropdown-item">Clothing</a>
                                     </Link>
                                 </li>
                                 <li><hr className="dropdown-divider" /></li>
                                 <li>
-                                    <Link href="/products" className="dropdown-item">
-                                        All Products
+                                    <Link href="/products" legacyBehavior>
+                                        <a className="dropdown-item">All Products</a>
                                     </Link>
                                 </li>
                             </ul>
