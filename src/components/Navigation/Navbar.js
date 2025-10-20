@@ -22,8 +22,8 @@ export default function Navbar() {
     return (
         <nav className="navbar navbar-expand-lg bg-primary navbar-dark sticky-top">
             <div className="container">
-                <Link href="/" legacyBehavior>
-                    <a className="navbar-brand fw-bold">Adedoyin-Ecommerce</a>
+                <Link href="/" className="navbar-brand fw-bold">
+                    Adedoyin-Ecommerce
                 </Link>
 
                 <button
@@ -41,13 +41,19 @@ export default function Navbar() {
                 <div className="collapse navbar-collapse" id="navbarSupportedContent">
                     <ul className="navbar-nav mx-auto mb-2 mb-lg-0">
                         <li className="nav-item">
-                            <Link href="/" legacyBehavior>
-                                <a className={`nav-link ${router.pathname === '/' ? 'active' : ''}`}>Home</a>
+                            <Link
+                                href="/"
+                                className={`nav-link ${router.pathname === '/' ? 'active' : ''}`}
+                            >
+                                Home
                             </Link>
                         </li>
                         <li className="nav-item">
-                            <Link href="/products" legacyBehavior>
-                                <a className={`nav-link ${router.pathname.startsWith('/products') ? 'active' : ''}`}>Products</a>
+                            <Link
+                                href="/products"
+                                className={`nav-link ${router.pathname.startsWith('/products') ? 'active' : ''}`}
+                            >
+                                Products
                             </Link>
                         </li>
                         <li className="nav-item dropdown">
@@ -62,19 +68,19 @@ export default function Navbar() {
                             </a>
                             <ul className="dropdown-menu">
                                 <li>
-                                    <Link href="/categories/electronics" legacyBehavior>
-                                        <a className="dropdown-item">Electronics</a>
+                                    <Link href="/categories/electronics" className="dropdown-item">
+                                        Electronics
                                     </Link>
                                 </li>
                                 <li>
-                                    <Link href="/categories/clothing" legacyBehavior>
-                                        <a className="dropdown-item">Clothing</a>
+                                    <Link href="/categories/clothing" className="dropdown-item">
+                                        Clothing
                                     </Link>
                                 </li>
                                 <li><hr className="dropdown-divider" /></li>
                                 <li>
-                                    <Link href="/products" legacyBehavior>
-                                        <a className="dropdown-item">All Products</a>
+                                    <Link href="/products" className="dropdown-item">
+                                        All Products
                                     </Link>
                                 </li>
                             </ul>
